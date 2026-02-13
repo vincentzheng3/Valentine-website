@@ -1,72 +1,63 @@
 // Elements
-const envelope = document.getElementById("envelope-container");
-const letter = document.getElementById("letter-container");
-const noBtn = document.querySelector(".no-btn");
-const yesBtn = document.querySelector(".btn[alt='Yes']");
+const envelopeScreen = document.getElementById("envelope-container");
+const letterScreen = document.getElementById("letter-container");
 
 const title = document.getElementById("letter-title");
 const catImg = document.getElementById("letter-cat");
 const buttons = document.getElementById("letter-buttons");
 const finalText = document.getElementById("final-text");
 
-// Click Envelope
+const yesBtn = document.querySelector(".yes-btn");
+const noBtn = document.querySelector(".no-btn");
 
-envelope.addEventListener("click", () => {
-    envelope.style.display = "none";
-    letter.style.display = "flex";
+// Helper
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
 
-    setTimeout( () => {
-        document.querySelector(".letter-window").classList.add("open");
-    },50);
+// Click envelope -> show letter
+envelopeScreen.addEventListener("click", () => {
+  envelopeScreen.style.display = "none";
+  letterScreen.style.display = "flex";
+  letterScreen.setAttribute("aria-hidden", "false");
+
+  // Animate the window pop-in
+  window.setTimeout(() => {
+    document.querySelector(".letter-window")?.classList.add("open");
+  }, 50);
 });
 
-// Logic to move the NO btn
-
+// Make the NO button dodge the mouse (but keep it on screen)
 noBtn.addEventListener("mouseover", () => {
-    const min = 200;
-    const max = 200;
+  const distance = 180;
+  const angle = Math.random() * Math.PI * 2;
 
-    const distance = Math.random() * (max - min) + min;
-    const angle = Math.random() * Math.PI * 2;
+  const rawX = Math.cos(angle) * distance;
+  const rawY = Math.sin(angle) * distance;
 
-    const moveX = Math.cos(angle) * distance;
-    const moveY = Math.sin(angle) * distance;
+  const rect = noBtn.getBoundingClientRect();
+  const padding = 20;
 
-    noBtn.style.transition = "transform 0.3s ease";
-    noBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
+  // Max translation so the button stays inside viewport
+  const maxLeft = rect.left - padding;
+  const maxRight = window.innerWidth - rect.right - padding;
+  const maxUp = rect.top - padding;
+  const maxDown = window.innerHeight - rect.bottom - padding;
+
+  const moveX = clamp(rawX, -maxLeft, maxRight);
+  const moveY = clamp(rawY, -maxUp, maxDown);
+
+  noBtn.style.transition = "transform 0.25s ease";
+  noBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
 });
-
-// Logic to make YES btn to grow
-
-// let yesScale = 1;
-
-// yesBtn.style.position = "relative"
-// yesBtn.style.transformOrigin = "center center";
-// yesBtn.style.transition = "transform 0.3s ease";
-
-// noBtn.addEventListener("click", () => {
-//     yesScale += 2;
-
-//     if (yesBtn.style.position !== "fixed") {
-//         yesBtn.style.position = "fixed";
-//         yesBtn.style.top = "50%";
-//         yesBtn.style.left = "50%";
-//         yesBtn.style.transform = `translate(-50%, -50%) scale(${yesScale})`;
-//     }else{
-//         yesBtn.style.transform = `translate(-50%, -50%) scale(${yesScale})`;
-//     }
-// });
 
 // YES is clicked
-
 yesBtn.addEventListener("click", () => {
-    title.textContent = "Yippeeee!";
+  title.textContent = "YIPPEEEE!";
+  catImg.src = "cat_dance.gif";
 
-    catImg.src = "cat_dance.gif";
+  document.querySelector(".letter-window")?.classList.add("final");
 
-    document.querySelector(".letter-window").classList.add("final");
-
-    buttons.style.display = "none";
-
-    finalText.style.display = "block";
+  buttons.style.display = "none";
+  finalText.hidden = false;
 });
